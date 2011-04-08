@@ -2,9 +2,8 @@ package org.glassfish.milestones;
 
 import java.util.Date;
 
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.parameter.Value;
+import net.fortuna.ical4j.model.property.Uid;
 
 public class Milestone {
     private String milestone;
@@ -62,10 +61,10 @@ public class Milestone {
     }
 
     public VEvent toEvent() {
-        VEvent event = new VEvent(new net.fortuna.ical4j.model.Date(getStart()),
-            new net.fortuna.ical4j.model.Date(getEnd()), getDescription());
-        event.getProperties().getProperty(Property.DTSTART).getParameters().add(Value.DATE);
-        event.getProperties().getProperty(Property.DTEND).getParameters().add(Value.DATE);
+        VEvent event = new VEvent(new net.fortuna.ical4j.model.Date(getEnd()), getDescription());
+//        event.getProperties().getProperty(Property.DTSTART).getParameters().add(Value.DATE);
+//        event.getProperties().getProperty(Property.DTEND).getParameters().add(Value.DATE);
+        event.getProperties().add(new Uid(getMilestone()));
         return event;
     }
 
