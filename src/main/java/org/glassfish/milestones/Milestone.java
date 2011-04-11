@@ -75,7 +75,7 @@ public class Milestone {
         final VAlarm alarm = new VAlarm(new DateTime(weekPrior.getTime()));
         alarm.getProperties().add(Action.DISPLAY);
         alarm.getProperties().add(new Description(alarmDesc + " is due in one week"));
-        event.getAlarms().add(alarm);
+//        event.getAlarms().add(alarm);
         return event;
     }
 
