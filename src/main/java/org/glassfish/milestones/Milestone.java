@@ -1,8 +1,13 @@
 package org.glassfish.milestones;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Action;
+import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Uid;
 
 public class Milestone {
@@ -61,10 +66,16 @@ public class Milestone {
     }
 
     public VEvent toEvent() {
+        Calendar weekPrior = Calendar.getInstance();
+        weekPrior.setTime(getEnd());
+        weekPrior.add(Calendar.WEEK_OF_YEAR, -1);
         VEvent event = new VEvent(new net.fortuna.ical4j.model.Date(getEnd()), getDescription());
-//        event.getProperties().getProperty(Property.DTSTART).getParameters().add(Value.DATE);
-//        event.getProperties().getProperty(Property.DTEND).getParameters().add(Value.DATE);
-        event.getProperties().add(new Uid(getMilestone()));
+        final String alarmDesc = "GlassFish 3.2 " + getMilestone();
+        event.getProperties().add(new Uid(alarmDesc));
+        final VAlarm alarm = new VAlarm(new DateTime(weekPrior.getTime()));
+        alarm.getProperties().add(Action.DISPLAY);
+        alarm.getProperties().add(new Description(alarmDesc + " is due in one week"));
+        event.getAlarms().add(alarm);
         return event;
     }
 

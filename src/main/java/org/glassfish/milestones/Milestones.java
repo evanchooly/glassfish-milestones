@@ -2,12 +2,12 @@ package org.glassfish.milestones;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,7 +69,6 @@ public class Milestones {
                 value = value.substring(value.indexOf(">") + 1, value.lastIndexOf("<"));
             } catch (StringIndexOutOfBoundsException e) {
                 value = value.replaceAll("<br.*/>", "");
-                System.out.println("value = " + value);
             }
         }
         return trim(value);
@@ -89,7 +88,7 @@ public class Milestones {
 
     public static void main(String[] args) throws ValidationException, IOException, ParseException {
         final Milestones milestones = new Milestones();
-        milestones.read(new FileInputStream("milestones.html"));
+        milestones.read(new URL("http://wikis.sun.com/display/GlassFish/GlassFishV3Schedule").openConnection().getInputStream());
         final FileOutputStream fout = new FileOutputStream(new File("milestones.ics"));
         milestones.generate(fout);
         fout.flush();
