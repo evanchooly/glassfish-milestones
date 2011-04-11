@@ -37,7 +37,7 @@ public class Milestone {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public final void setEnd(Date end) {
         this.end = end == null ? new Date(Integer.MAX_VALUE) : end;
     }
 
@@ -53,7 +53,7 @@ public class Milestone {
         return start;
     }
 
-    public void setStart(Date date) {
+    public final void setStart(Date date) {
         start = date == null ? new Date(0) : date;
     }
 
