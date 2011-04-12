@@ -10,9 +10,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
@@ -28,12 +26,18 @@ import net.fortuna.ical4j.model.property.Version;
 @SuppressWarnings({"StringContatenationInLoop"})
 public class Milestones {
     private SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-    private List<Milestone> markers = new ArrayList<Milestone>();
     private Calendar calendar;
     private Uid uid = new Uid("ba67eba8-ed76-450d-90bb-540ec69070d4");
 
+    public Milestones() {
+        calendar = new Calendar();
+        calendar.getProperties().add(new ProdId("GlassFish 3.2 CalGen"));
+        calendar.getProperties().add(Version.VERSION_2_0);
+        calendar.getProperties().add(CalScale.GREGORIAN);
+    }
+
     @SuppressWarnings({"UnusedAssignment"})
-    public void read(InputStream uri) throws IOException, ParseException, ValidationException {
+    public void readMileStones(InputStream uri) throws IOException, ParseException, ValidationException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(uri));
         String line;
         while ((line = reader.readLine()) != null && !line
@@ -43,35 +47,47 @@ public class Milestones {
             line = trim(reader.readLine());
         }
         while (!(line = trim(reader.readLine())).endsWith("</table>")) {
-            markers.add(new Milestone(
+            final Milestone milestone = new Milestone(
                 getText(reader.readLine()),
                 parse(getText(reader.readLine())),
                 parse(getText(reader.readLine())),
                 getText(reader.readLine()),
-                getText(reader.readLine())));
+                getText(reader.readLine()));
+            calendar.getComponents().add(milestone.toEvent());
             line = trim(reader.readLine());  // consume the </tr>
         }
-        calendar = new Calendar();
-        calendar.getProperties().add(new ProdId("GlassFish 3.2 CalGen"));
-        calendar.getProperties().add(Version.VERSION_2_0);
-        calendar.getProperties().add(CalScale.GREGORIAN);
+    }
 
-        for (Milestone marker : markers) {
-            calendar.getComponents().add(marker.toEvent());
+    private void readBuilds(InputStream inputStream) throws IOException, ParseException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = reader.readLine()) != null && !line
+            .contains("a name=\"3.2BuildSchedule-GlassFishServerOpenSourceEdition3.2BuildSchedule\"")) {
         }
-//        calendar.validate();
+        for (int index = 0; index < 11; index++) {
+            line = reader.readLine();
+        }
+        while (!(line = trim(reader.readLine())).endsWith("</table>")) {
+            final Build build = new Build(
+                getText(reader.readLine()),
+                parse(getText(reader.readLine())),
+                getText(reader.readLine()),
+                getText(reader.readLine()));
+            calendar.getComponents().add(build.toEvent());
+            line = trim(reader.readLine());  // consume the </tr>
+        }
     }
 
     private String getText(String line) {
-        String value = line;
-        while (value.contains("<")) {
+        StringBuilder value = new StringBuilder(line);
+        while (value.indexOf("<") != -1) {
             try {
-                value = value.substring(value.indexOf(">") + 1, value.lastIndexOf("<"));
+                value = value.replace(value.indexOf("<"), value.indexOf(">") + 1, "");
             } catch (StringIndexOutOfBoundsException e) {
-                value = value.replaceAll("<br.*/>", "");
+//                value = value.replaceAll("<br.*/>", "");
             }
         }
-        return trim(value);
+        return trim(value.toString());
     }
 
     public void generate(OutputStream fout) throws IOException, ValidationException {
@@ -88,7 +104,10 @@ public class Milestones {
 
     public static void main(String[] args) throws ValidationException, IOException, ParseException {
         final Milestones milestones = new Milestones();
-        milestones.read(new URL("http://wikis.sun.com/display/GlassFish/GlassFishV3Schedule").openConnection().getInputStream());
+        milestones.readMileStones(
+            new URL("http://wikis.sun.com/display/GlassFish/GlassFishV3Schedule").openConnection().getInputStream());
+        milestones.readBuilds(
+            new URL("http://wikis.sun.com/display/GlassFish/3.2BuildSchedule").openConnection().getInputStream());
         final FileOutputStream fout = new FileOutputStream(new File("milestones.ics"));
         milestones.generate(fout);
         fout.flush();
