@@ -37,18 +37,19 @@ public class Milestones {
     }
 
     @SuppressWarnings({"UnusedAssignment"})
-    public void readMileStones(InputStream uri) throws IOException, ParseException, ValidationException {
+    public void readMileStones(final String branch, InputStream uri) throws IOException, ParseException, ValidationException {
+        String target = String.format("a name=\"GlassFishV3Schedule-GlassFishServerOpenSourceEdition%sInDevelopment\"", branch);
         final BufferedReader reader = new BufferedReader(new InputStreamReader(uri));
         String line;
         while ((line = reader.readLine()) != null && !line
-            .contains("a name=\"GlassFishV3Schedule-GlassFishServerOpenSourceEdition3.2InDevelopment\"")) {
+            .contains(target)) {
         }
         for (int i = 0; i < 10; i++) {
             line = trim(reader.readLine());
         }
         while (!(line = trim(reader.readLine())).endsWith("</table>")) {
             final Milestone milestone = new Milestone(
-                getText(reader.readLine()),
+                branch, getText(reader.readLine()),
                 parse(getText(reader.readLine())),
                 parse(getText(reader.readLine())),
                 getText(reader.readLine()),
@@ -58,21 +59,34 @@ public class Milestones {
         }
     }
 
-    private void readBuilds(InputStream inputStream) throws IOException, ParseException {
+    private void readBuilds(final String branch, InputStream inputStream, final int skipCount, boolean showBugsFixed) throws IOException, ParseException {
+        String target = String.format("a name=\"%sBuildSchedule-GlassFishServerOpenSourceEdition%sBuildSchedule\"",
+            branch, branch);
+
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while ((line = reader.readLine()) != null && !line
-            .contains("a name=\"3.2BuildSchedule-GlassFishServerOpenSourceEdition3.2BuildSchedule\"")) {
+            .contains(target)) {
         }
-        for (int index = 0; index < 11; index++) {
+        for (int index = 0; index < skipCount; index++) {
             line = reader.readLine();
         }
         while (!(line = trim(reader.readLine())).endsWith("</table>")) {
-            final Build build = new Build(
-                getText(reader.readLine()),
-                parse(getText(reader.readLine())),
-                getText(reader.readLine()),
-                getText(reader.readLine()));
+            Build build;
+            if(showBugsFixed) {
+                build = new Build(branch, getText(reader.readLine()),
+                    parse(getText(reader.readLine())),
+                    getText(reader.readLine()),
+                    getText(reader.readLine()),
+                    getText(reader.readLine()));
+
+            } else {
+                build = new Build(branch, getText(reader.readLine()),
+                    parse(getText(reader.readLine())),
+                    getText(reader.readLine()),
+                    getText(reader.readLine()));
+
+            }
             calendar.getComponents().add(build.toEvent());
             line = trim(reader.readLine());  // consume the </tr>
         }
@@ -104,10 +118,22 @@ public class Milestones {
 
     public static void main(String[] args) throws ValidationException, IOException, ParseException {
         final Milestones milestones = new Milestones();
-        milestones.readMileStones(
-            new URL("http://wikis.sun.com/display/GlassFish/GlassFishV3Schedule").openConnection().getInputStream());
-        milestones.readBuilds(
-            new URL("http://wikis.sun.com/display/GlassFish/3.2BuildSchedule").openConnection().getInputStream());
+        milestones.readMileStones("3.2",
+            new URL("http://wikis.sun.com/display/GlassFish/GlassFishV3Schedule")
+            .openConnection().getInputStream()
+        );
+        milestones.readMileStones("3.1.1",
+            new URL("http://wikis.sun.com/display/GlassFish/GlassFishV3Schedule")
+            .openConnection().getInputStream()
+        );
+        milestones.readBuilds("3.2",
+            new URL("http://wikis.sun.com/display/GlassFish/3.2BuildSchedule")
+                .openConnection().getInputStream(), 11,
+            false);
+        milestones.readBuilds("3.1.1",
+            new URL("http://wikis.sun.com/display/GlassFish/3.1.1BuildSchedule")
+            .openConnection().getInputStream(), 12,
+            true);
         final FileOutputStream fout = new FileOutputStream(new File("milestones.ics"));
         milestones.generate(fout);
         fout.flush();

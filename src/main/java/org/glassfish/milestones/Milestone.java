@@ -1,12 +1,8 @@
 package org.glassfish.milestones;
 
-import java.util.Calendar;
 import java.util.Date;
 
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Uid;
 
@@ -16,13 +12,15 @@ public class Milestone {
     private Date end;
     private String description;
     private String status;
+    private String branch;
 
-    public Milestone(String milestone, Date start, Date end, String description, String status) {
+    public Milestone(final String branch, String milestone, Date start, Date end, String description, String status) {
         this.description = description;
         setEnd(end);
         this.milestone = milestone;
         setStart(start);
         this.status = status;
+        this.branch = branch;
     }
 
     public String getDescription() {
@@ -66,16 +64,10 @@ public class Milestone {
     }
 
     public VEvent toEvent() {
-        Calendar weekPrior = Calendar.getInstance();
-        weekPrior.setTime(getEnd());
-        weekPrior.add(Calendar.WEEK_OF_YEAR, -1);
-        VEvent event = new VEvent(new net.fortuna.ical4j.model.Date(getEnd()), getDescription());
-        final String alarmDesc = "GlassFish 3.2 " + getMilestone();
-        event.getProperties().add(new Uid(alarmDesc));
-        final VAlarm alarm = new VAlarm(new DateTime(weekPrior.getTime()));
-        alarm.getProperties().add(Action.DISPLAY);
-        alarm.getProperties().add(new Description(alarmDesc + " is due in one week"));
-//        event.getAlarms().add(alarm);
+        VEvent event = new VEvent(new net.fortuna.ical4j.model.Date(getEnd()), String.format(
+            "GlassFish %s %s", branch, getMilestone()));
+        event.getProperties().add(new Uid("GlassFish " + branch + " " + getMilestone()));
+        event.getProperties().add(new Description(String.format("%s", getDescription())));
         return event;
     }
 
