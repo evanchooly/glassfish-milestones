@@ -87,11 +87,13 @@ public class Build {
             "* Download: %s\n"
                 + "* Comments: %s\n"
                 + "* Subversion revision: %s\n"
+                + "* Subversion tag: %s\n"
                 + "* Bugs fixed: %s",
             String.format("http://dlc.sun.com.edgesuite.net/glassfish/%s/promoted/glassfish-%s-b%s.zip",
                 getBranch(), getBranch(), getNumber()),
             getComment(),
             getSvnRev(),
+            String.format("https://svn.java.net/svn/glassfish~svn/tags/%s-b%s", getBranch(), getNumber()),
             getBugsFixed() == null ? "" : getBugsFixed())));
         return event;
     }

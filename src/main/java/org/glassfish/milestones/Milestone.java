@@ -67,7 +67,7 @@ public class Milestone {
         VEvent event = new VEvent(new net.fortuna.ical4j.model.Date(getEnd()), String.format(
             "GlassFish %s %s", branch, getMilestone()));
         event.getProperties().add(new Uid("GlassFish " + branch + " " + getMilestone()));
-        event.getProperties().add(new Description(String.format("%s", getDescription())));
+        event.getProperties().add(new Description(getDescription()));
         return event;
     }
 
