@@ -14,7 +14,7 @@ public class Build {
     private String svnRev;
     private String branch;
 
-    public Build(final String branch, String number, Date date, String comment, String svnRev) {
+    public Build(String branch, String number, Date date, String comment, String svnRev) {
         this.number = number;
         this.date = date;
         this.comment = comment;
@@ -22,7 +22,7 @@ public class Build {
         this.branch = branch;
     }
 
-    public Build(final String branch, String number, Date date, String comment, String bugsFixed, String svnRev) {
+    public Build(String branch, String number, Date date, String comment, String bugsFixed, String svnRev) {
         this.number = number;
         this.date = date;
         this.comment = comment;
@@ -35,48 +35,24 @@ public class Build {
         return number;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
     public Date getDate() {
         return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public String getComment() {
         return comment;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
     public String getSvnRev() {
         return svnRev;
-    }
-
-    public void setSvnRev(String svnRev) {
-        this.svnRev = svnRev;
     }
 
     public String getBranch() {
         return branch;
     }
 
-    public void setBranch(String branch) {
-        this.branch = branch;
-    }
-
     public String getBugsFixed() {
         return bugsFixed;
-    }
-
-    public void setBugsFixed(String bugsFixed) {
-        this.bugsFixed = bugsFixed;
     }
 
     public VEvent toEvent() {
