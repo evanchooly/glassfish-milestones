@@ -43,7 +43,7 @@ public class Milestones {
     }
 
     private Date parse(String text) throws ParseException {
-        return "".equals(text) ? null : sdf.parse(text);
+        return "".equals(text) || "TBD".equals(text) ? null : sdf.parse(text);
     }
 
     private void readBuilds(String branch, URL url, int tableNumber, boolean showBugsFixed)
